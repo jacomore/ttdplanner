@@ -18,3 +18,4 @@ def progress(iterator):
     print(" \r", end='')
 
 print("ciao giggi")
+print("ciao giacomo")
