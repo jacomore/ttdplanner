@@ -17,5 +17,4 @@ def progress(iterator):
         yield element
     print(" \r", end='')
 
-print("ciao giggi")
 print("ciao giacomo")
