@@ -1,28 +1,43 @@
 import argparse
 import os
 import pandas as pd
+from datetime import datetime
 
-def junk(columns):
 
-    void_planner = pd.DataFrame(columns=columns)
+def init_data():
+    features = ["title","note","date"]
+    plan = pd.DataFrame(columns = features)
 
     loc_dir = os.path.abspath(os.getcwd())
     dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
     data_path = os.path.abspath(os.path.join(dir_path,"data.csv"))
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
-        void_planner.to_csv(dir_path)
+        plan.to_csv(data_path,index = False)
     else:
         if not os.path.exists(data_path):
+            plan.to_csv(data_path,index = False)
 
+        else:
+            plan = pd.read_csv(data_path,index_col = False)
+    return plan
 
+def update_data(plan):
+    loc_dir = os.path.abspath(os.getcwd())
+    dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
+    data_path = os.path.abspath(os.path.join(dir_path,"data.csv"))
+    plan.to_csv(data_path,index = False)
+    return 
 
+def add_note(args,plan):
+    item = {}
+    for name in plan.columns:
+        item[str(name)] = vars(args)[str(name)]
 
-
-
-
-def add_note(args):
-    pass
+    plan = plan.append(pd.DataFrame(item,index=[0]))    
+    update_data(plan)
+    
+    return plan 
 
 def print_planner(args):
     pass
@@ -34,16 +49,16 @@ def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help='possible actions', dest='subparser')
     
-    insert_parser = subparsers.add_parser('insert', help='Insert a new item into the planner')
-    insert_parser.add_argument('note', help='Note to be saved', type=str)
-    # optional argument
-    # square_parser.add_argument("power", 
-    #    help="power to raised at", 
-    #    type=float,
-    #    nargs='?', # this argument might be absent
-    #    default=2, # the default value it takes if it absent
-    #)
-    
+    plan = init_data()
+
+    insert_parser = subparsers.add_parser('insert', help = 'Insert a new item into the planner')
+    insert_parser.add_argument(str(plan.columns[0]),
+        help ='Title of the note', type=str,nargs='?', default = "...")
+    insert_parser.add_argument(str(plan.columns[1]),
+        help ='Body of the note', type=str,nargs='?' , default = "...")
+    insert_parser.add_argument(str(plan.columns[2]),
+        help ='Date of the note', type=str,nargs='?',default = datetime.today().strftime('%Y-%m-%d'))
+   
     print_parser = subparsers.add_parser('print', help='Print out all the notes')    
 
     search_parser = subparsers.add_parser('search', help='Find and print the notes that contain -word-')
@@ -54,14 +69,15 @@ def main():
     args = parser.parse_args()
     
     if args.subparser=='insert':
-        add_note(args)
+        plan = add_note(args,plan)
     if args.subparser=='print':
         print_planner(args)
     if args.subparser=='search':
         search_and_print(args)
-        
+
+    print(plan) 
+
 if __name__ == '__main__':
     main()
-    
 
 
