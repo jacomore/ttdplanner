@@ -46,7 +46,6 @@ def print_planner(plan):
             showindex=False)
     print(plan_tab(plan))
     return
-    
 
 def search_and_print(args):
     pass
