@@ -40,6 +40,7 @@ def add_note(args,plan):
     return plan 
 
 def print_planner(args):
+    print("GIACOMO")
     pass
 
 def search_and_print(args):
