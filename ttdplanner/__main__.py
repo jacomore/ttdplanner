@@ -2,7 +2,7 @@ import argparse
 import os
 import pandas as pd
 from datetime import datetime
-
+from tabulate import tabulate
 
 def init_data():
     features = ["title","note","date"]
@@ -39,9 +39,14 @@ def add_note(args,plan):
     
     return plan 
 
-def print_planner(args):
-    print("GIACOMO")
-    pass
+def print_planner(plan):
+    plan_tab = lambda plan:tabulate(plan,
+            headers = [str(plan.columns[0]),str(plan.columns[1]),str(plan.columns[2])],
+            tablefmt="fancy_grid",
+            showindex=False)
+    print(plan_tab(plan))
+    return
+    
 
 def search_and_print(args):
     pass
@@ -72,11 +77,10 @@ def main():
     if args.subparser=='insert':
         plan = add_note(args,plan)
     if args.subparser=='print':
-        print_planner(args)
+        print_planner(plan)
     if args.subparser=='search':
         search_and_print(args)
 
-    print(plan) 
 
 if __name__ == '__main__':
     main()
