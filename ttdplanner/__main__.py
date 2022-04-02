@@ -4,7 +4,6 @@ import pandas as pd
 from datetime import datetime
 from tabulate import tabulate
 
-
 def init_data():
     features = ["title", "note", "date"]
     plan = pd.DataFrame(columns=features)
@@ -24,15 +23,55 @@ def init_data():
     return plan
 
 
-def update_data(plan):
+def update_data(
+        plan: pd.DataFrame):
+    """
+    Parameters
+    ----------
+    plan: pd.DataFrame. Contains all the notes
+    
+    Notes
+    ----
+    This function takes in input the updated version of plan and 
+    overwrite the existing local copy in "Data/data.csv"
+    """
+    # finding the local dir
     loc_dir = os.path.abspath(os.getcwd())
+
+    # moving to the parent dir
     dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
+    
+    # path of the file "data.csv"
     data_path = os.path.abspath(os.path.join(dir_path, "data.csv"))
+    
+    # overwriting data
     plan.to_csv(data_path, index=False)
     return
 
 
-def add_note(args, plan):
+def add_note(
+        args: argparse.Namespace,  # parser arguments
+        plan: pd.DataFrame  # DataFrame to be updated
+        ) -> pd.DataFrame:
+    """
+    Parameters
+    ----------
+    args: argparse.Namespace. Contains the arguments "title", "note" and "date"
+    plan: pd.DataFrame. Contains all the notes
+
+    Returns
+    -------
+    plan: pd.DataFrame with the added note
+
+    Notes
+    -----
+    This function adds a new note to the existing planner.
+
+    Warnings
+    --------
+    This function must be updated everytime the columns of the plan are changed
+    """
+ 
     item = {}
     for name in plan.columns:
         item[str(name)] = vars(args)[str(name)]
@@ -44,7 +83,6 @@ def add_note(args, plan):
 
 
 def add_note_verbose(
-        args: argparse.Namespace,  # parser arguments
         plan: pd.DataFrame  # DataFrame to be updated
         ) -> pd.DataFrame:
     """
@@ -73,22 +111,30 @@ def add_note_verbose(
     item["title"] = title
 
     "body"
-    print("It's time to write your note")
-    note = input()
+    note = input("It's time to write your note: ")
     item["note"] = note
 
-    "data"
-    data = input("Insert the data (press Enter to use the current data): ")
-    if data == '':  # insert the current data if requested
-        data = datetime.today().strftime('%Y-%m-%d')
-    item["date"] = data
+    "date"
+    date = input("Insert the date 'Y-m-d'. Press Enter to use the current date: ")
+    if date == '':  # insert the current data if requested
+        date = datetime.today().strftime('%Y-%m-%d')
+    item["date"] = date
 
     "updating the plan"
     plan = plan.append(pd.DataFrame(item, index=[0]))
     update_data(plan)
 
-
-def print_planner(plan):
+def print_planner(
+        plan: pd.DataFrame):
+    """
+    Parameters
+    ----------
+    plan: pd.DataFrame. Contains all the notes
+    
+    Notes
+    ----
+    The function prints in the terminal all the notes 
+    """   
     plan_tab = lambda plan: tabulate(plan,
                                      headers=[str(plan.columns[0]), str(plan.columns[1]), str(plan.columns[2])],
                                      tablefmt="fancy_grid",
@@ -132,7 +178,7 @@ def main():
 
     if args.subparser == 'insert':
         if args.verbose:
-            plan = add_note_verbose(args, plan)
+            plan = add_note_verbose(plan)
         else:
             plan = add_note(args, plan)
 
