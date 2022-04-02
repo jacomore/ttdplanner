@@ -3,9 +3,11 @@ import os
 import pandas as pd
 from datetime import datetime
 from tabulate import tabulate
+import re
+from ast import literal_eval
 
 def init_data():
-    features = ["title", "note", "date"]
+    features = ["title", "note", "date", "tags"]
     plan = pd.DataFrame(columns=features)
 
     loc_dir = os.path.abspath(os.getcwd())
@@ -74,9 +76,16 @@ def add_note(
  
     item = {}
     for name in plan.columns:
-        item[str(name)] = vars(args)[str(name)]
+        if str(name) != "tags":
+            item[str(name)] = vars(args)[str(name)]
 
-    plan = plan.append(pd.DataFrame(item, index=[0]))
+    #  these three lines insert a list in the pd.DataFrame. ATTENTION: it is stored as a string
+    #  they are needed because pd.DataFrame can't be initialized with nested data
+    item["tags"] = "..."
+    data = pd.DataFrame(item, index=[0])
+    data.at[0, "tags"] = vars(args)[str("tags")]  # use literal_eval('[1.23, 2.34]') to read this data
+
+    plan = plan.append(data)
     update_data(plan)
 
     return plan  # questo credo che vada eliminato
@@ -84,7 +93,7 @@ def add_note(
 
 def add_note_verbose(
         plan: pd.DataFrame  # DataFrame to be updated
-        ) -> pd.DataFrame:
+        ):
     """
     Parameters
     ----------
@@ -120,8 +129,16 @@ def add_note_verbose(
         date = datetime.today().strftime('%Y-%m-%d')
     item["date"] = date
 
+    "tags"
+    tags = input("Insert the tags (separated by a space or a comma): ")
+    #  these three lines insert a list in the pd.DataFrame. ATTENTION: it is stored as a string
+    #  they are needed because pd.DataFrame can't be initialized with nested data
+    item["tags"] = "..."
+    data_bug = pd.DataFrame(item, index=[0])
+    data_bug.at[0, "tags"] = re.sub("[^\w]", " ",  tags).split()  # use literal_eval('[1.23, 2.34]') to read this data
+
     "updating the plan"
-    plan = plan.append(pd.DataFrame(item, index=[0]))
+    plan = plan.append(data_bug)
     update_data(plan)
 
 def print_planner(
@@ -134,14 +151,17 @@ def print_planner(
     Notes
     ----
     The function prints in the terminal all the notes 
-    """   
+    """
+
+    #  convert the tags in a readable format
+    for i in range(plan.shape[0]):
+        plan.at[i,"tags"] = ', '.join(literal_eval(plan.at[i,"tags"]))
+
     plan_tab = lambda plan: tabulate(plan,
-                                     headers=[str(plan.columns[0]), str(plan.columns[1]), str(plan.columns[2])],
+                                     headers=[str(plan.columns[0]), str(plan.columns[1]), str(plan.columns[2]), str(plan.columns[3])],
                                      tablefmt="fancy_grid",
                                      showindex=False)
     print(plan_tab(plan))
-    return
-
 
 def search_and_print(args):
     pass
@@ -156,7 +176,7 @@ def main():
     # insert parser
     insert_parser = subparsers.add_parser('insert', help='Insert a new item into the planner')
     insert_parser.add_argument("-v", "--verbose",
-                               help="increase output verbosity", action="store_true")
+                               help="Increase output verbosity", action="store_true")
     insert_parser.add_argument(str(plan.columns[0]),
                                help='Title of the note', type=str, nargs='?', default="...")
     insert_parser.add_argument(str(plan.columns[1]),
@@ -164,6 +184,8 @@ def main():
     insert_parser.add_argument(str(plan.columns[2]),
                                help='Date of the note', type=str, nargs='?',
                                default=datetime.today().strftime('%Y-%m-%d'))
+    insert_parser.add_argument("-t", "--tags",
+                               help="Tags of the note", nargs='+', default=str(["generic"]))
 
     # print parser
     print_parser = subparsers.add_parser('print', help='Print out all the notes')
