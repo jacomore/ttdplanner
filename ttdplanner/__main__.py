@@ -88,7 +88,7 @@ def add_note(
     plan = plan.append(data)
     update_data(plan)
 
-    return plan  # questo credo che vada eliminato
+    return
 
 
 def add_note_verbose(
@@ -135,7 +135,7 @@ def add_note_verbose(
     #  they are needed because pd.DataFrame can't be initialized with nested data
     item["tags"] = "..."
     data_bug = pd.DataFrame(item, index=[0])
-    data_bug.at[0, "tags"] = re.sub("[^\w]", " ",  tags).split()  # use literal_eval('[1.23, 2.34]') to read this data
+    data_bug.at[0, "tags"] = re.sub(r"[^\w]", " ",  tags).split()  # use literal_eval('[1.23, 2.34]') to read this data
 
     "updating the plan"
     plan = plan.append(data_bug)
@@ -152,20 +152,44 @@ def print_planner(
     ----
     The function prints in the terminal all the notes 
     """
-
-    #  convert the tags in a readable format
-    for i in range(plan.shape[0]):
-        plan.at[i,"tags"] = ', '.join(literal_eval(plan.at[i,"tags"]))
-
+   
+    # Extracting the actual indeces of the pandas (it may have been
+    # truncated in search_word)
+    idx_plan  = plan.index.to_list()
+    
+    #  convert the tags in a readable format 
+    for i,tag in enumerate(plan["tags"]):
+        plan.at[idx_plan[i],"tags"] = ', '.join(literal_eval(plan.at[idx_plan[i],'tags']))
+    
     plan_tab = lambda plan: tabulate(plan,
                                      headers=[str(plan.columns[0]), str(plan.columns[1]), str(plan.columns[2]), str(plan.columns[3])],
                                      tablefmt="fancy_grid",
                                      showindex=False)
     print(plan_tab(plan))
 
-def search_and_print(args):
-    pass
+def search_word(args,plan):
+    
+    # rewriting 'word' without capital letter
+    word = vars(args)["word"].lower()
+    
+    # row indeces whose title contains word
+    rows_idx = []
+    
+    # Converting plan to a list of lists to fasten the iteration through it
+    list_plan = plan.values 
+    
+    # Iterating through arr_plan
+    for idx,row in enumerate(list_plan):
+        
+        # rewriting title and note without capital letters
+        title = str(row[0]).lower()
+        note = str(row[1]).lower()
+        # checking if 'word' is either in title or note or both
+        if word in title or word in note: rows_idx.append(idx)     
 
+    # selecting only those rows whose titles or notes contain 'word'
+    selected_plan = plan.iloc[rows_idx,:]  
+    return selected_plan    
 
 def main():
     parser = argparse.ArgumentParser()
@@ -173,43 +197,48 @@ def main():
 
     plan = init_data()
 
-    # insert parser
+    # INSERT argument
     insert_parser = subparsers.add_parser('insert', help='Insert a new item into the planner')
     insert_parser.add_argument("-v", "--verbose",
                                help="Increase output verbosity", action="store_true")
+
+    # Title
     insert_parser.add_argument(str(plan.columns[0]),
                                help='Title of the note', type=str, nargs='?', default="...")
+    # Body of the note
     insert_parser.add_argument(str(plan.columns[1]),
                                help='Body of the note', type=str, nargs='?', default="...")
+    # Date
     insert_parser.add_argument(str(plan.columns[2]),
                                help='Date of the note', type=str, nargs='?',
                                default=datetime.today().strftime('%Y-%m-%d'))
+    # Tags
     insert_parser.add_argument("-t", "--tags",
                                help="Tags of the note", nargs='+', default=str(["generic"]))
 
-    # print parser
+    # PRINT argument
     print_parser = subparsers.add_parser('print', help='Print out all the notes')
 
-    # search parser
+    # SEARCH argument
     search_parser = subparsers.add_parser('search', help='Find and print the notes that contain -word-')
     search_parser.add_argument('word',
-                               help='word to be searched in planner and printed out',
+                               help='word to be searched in the body and the title of the notes',
                                type=str)
 
+    # arguments are converted into a argparser.Namespace object
     args = parser.parse_args()
+
 
     if args.subparser == 'insert':
         if args.verbose:
             plan = add_note_verbose(plan)
         else:
             plan = add_note(args, plan)
+    elif args.subparser == 'print':  print_planner(plan)
 
-    elif args.subparser == 'print':
-        print_planner(plan)
-
-    elif args.subparser == 'search':
-        search_and_print(args)
-
+    elif args.subparser == 'search':  
+        selected_plan = search_word(args,plan)
+        print_planner(selected_plan)
 
 if __name__ == '__main__':
     main()
