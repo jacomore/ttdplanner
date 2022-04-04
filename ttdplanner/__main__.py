@@ -157,9 +157,12 @@ def print_planner(
     # truncated in search_word)
     idx_plan  = plan.index.to_list()
     
-    #  convert the tags in a readable format 
+    #  convert the tags in a readable format, it accepts both list and string convertible in list
     for i,tag in enumerate(plan["tags"]):
-        plan.at[idx_plan[i],"tags"] = ', '.join(literal_eval(plan.at[idx_plan[i],'tags']))
+        if type(tag) is str:
+            plan.at[idx_plan[i],"tags"] = ', '.join(literal_eval(plan.at[idx_plan[i],'tags']))
+        elif type(tag) is list:
+            plan.at[idx_plan[i], "tags"] = ', '.join(tag)
     
     plan_tab = lambda plan: tabulate(plan,
                                      headers=[str(plan.columns[0]), str(plan.columns[1]), str(plan.columns[2]), str(plan.columns[3])],
@@ -188,8 +191,40 @@ def search_word(args,plan):
         if word in title or word in note: rows_idx.append(idx)     
 
     # selecting only those rows whose titles or notes contain 'word'
-    selected_plan = plan.iloc[rows_idx,:]  
+    selected_plan = plan.iloc[rows_idx,:]
     return selected_plan    
+
+def search_by_tag(args, plan):
+    """
+    Parameters
+    ----------
+    plan: pd.DataFrame. Contains all the notes
+    args: parse.parse_args(). Contains the tag to be searched
+
+    Notes
+    ----
+    The function prints in the terminal all the notes
+    """
+
+    #  rewriting 'word' in 'tag' without capital letter
+    tag_to_search = vars(args)["word"].lower()
+
+    #  row indexes whose title contains 'tag'
+    rows_idx = []
+
+    #  Converting plan to a list of lists to fasten the iteration through it
+    list_plan = plan["tags"].values
+
+    #  Searching for tags
+    for idx, tags in enumerate(list_plan):
+        list_plan[idx] = literal_eval(tags)
+        for tag in list_plan[idx]:
+            if tag.lower() == tag_to_search: rows_idx.append(idx)
+
+    #  selecting only those rows whose tags contain 'tag'
+    selected_plan = plan.iloc[rows_idx, :]
+
+    return selected_plan
 
 def main():
     parser = argparse.ArgumentParser()
@@ -221,6 +256,8 @@ def main():
 
     # SEARCH argument
     search_parser = subparsers.add_parser('search', help='Find and print the notes that contain -word-')
+    search_parser.add_argument("-t", "--tags",
+                               help="Search notes by tag", action="store_true")
     search_parser.add_argument('word',
                                help='word to be searched in the body and the title of the notes',
                                type=str)
@@ -236,8 +273,11 @@ def main():
             plan = add_note(args, plan)
     elif args.subparser == 'print':  print_planner(plan)
 
-    elif args.subparser == 'search':  
-        selected_plan = search_word(args,plan)
+    elif args.subparser == 'search':
+        if args.tags:
+            selected_plan = search_by_tag(args,plan)
+        else:
+            selected_plan = search_word(args,plan)
         print_planner(selected_plan)
 
 if __name__ == '__main__':
