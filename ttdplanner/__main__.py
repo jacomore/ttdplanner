@@ -1,5 +1,6 @@
 import argparse
 import os
+import numpy as np
 import pandas as pd
 from datetime import datetime
 from tabulate import tabulate
@@ -7,21 +8,46 @@ import re
 from ast import literal_eval
 
 def init_data():
+    """
+    Return
+    -------
+    Plan: pd.DataFrame. Item of the planner
+
+    Notes
+    -------
+    Reads the plan from the file in "pwd/../data/data.csv" and initialise it 
+    into the plan pandas dataframe. If either "data" folder or "data.csv" or both 
+    of them do not exist, it creates this file.
+
+    """
+    # Features of the plan
     features = ["title", "note", "date", "tags"]
+
+    # Initialise the plan as dataframe object
     plan = pd.DataFrame(columns=features)
 
+    # finding the current directory
     loc_dir = os.path.abspath(os.getcwd())
+    
+    # moving to the parent folder and into "data" folder
     dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
+    
+    # path to "data.csv" file
     data_path = os.path.abspath(os.path.join(dir_path, "data.csv"))
+    
+    # If the folder does not existing yet
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
         plan.to_csv(data_path, index=False)
+   # If the folder already exists
     else:
+        # If "data.csv" does not exist yet"
         if not os.path.exists(data_path):
             plan.to_csv(data_path, index=False)
-
+        # If "data.csv" already exists 
         else:
             plan = pd.read_csv(data_path, index_col=False)
+    # returning plan
     return plan
 
 
@@ -37,18 +63,36 @@ def update_data(
     This function takes in input the updated version of plan and 
     overwrite the existing local copy in "Data/data.csv"
     """
-    # finding the local dir
+    # finding the current directory
     loc_dir = os.path.abspath(os.getcwd())
-
-    # moving to the parent dir
-    dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
-    
-    # path of the file "data.csv"
+   
+    # moving to the parent directory and into "data" folder
+    dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data")) 
+   
+    # path to the "data.csv" file
     data_path = os.path.abspath(os.path.join(dir_path, "data.csv"))
+   
+     
+#    plan["date"] = pd.to_datetime(plan["date"], format = '%Y-%m-%d', errors='coerce')
+
+#    plan["date"] = plan["date"].dt.date
+
+#    plan_sorted = plan.sort_values(by="date")
+
     
     # overwriting data
     plan.to_csv(data_path, index=False)
-    return
+    pass
+
+def sort_by_date(plan): 
+
+    plan["date"] = pd.to_datetime(plan["date"], format = '%Y-%m-%d', errors='coerce')
+
+    plan["date"] = plan["date"].dt.date
+
+    plan_sorted = plan.sort_values(by="date")
+
+    return plan_sorted
 
 
 def add_note(
@@ -262,7 +306,13 @@ def main():
                                help='word to be searched in the body and the title of the notes',
                                type=str)
 
-    # arguments are converted into a argparser.Namespace object
+    # SORT argument
+    sort_parser = subparsers.add_parser('sort', help='Sort the notes by date')
+    sort_parser.add_argument("sort", help = 'sort the notes by date',type=str,
+                            nargs='?')
+
+
+        # arguments are converted into a argparser.Namespace object
     args = parser.parse_args()
 
 
@@ -279,6 +329,10 @@ def main():
         else:
             selected_plan = search_word(args,plan)
         print_planner(selected_plan)
+
+    elif args.subparser == 'sort': 
+        sorted_plan = sort_by_date(plan)
+        print_planner(sorted_plan)
 
 if __name__ == '__main__':
     main()
