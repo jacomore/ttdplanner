@@ -1,11 +1,11 @@
 import argparse
 import os
-import numpy as np
 import pandas as pd
 from datetime import datetime
 from tabulate import tabulate
 import re
 from ast import literal_eval
+import numpy as np
 
 def init_data():
     """
@@ -79,7 +79,6 @@ def update_data(
 
 #    plan_sorted = plan.sort_values(by="date")
 
-    
     # overwriting data
     plan.to_csv(data_path, index=False)
     pass
@@ -98,7 +97,7 @@ def sort_by_date(plan):
 def add_note(
         args: argparse.Namespace,  # parser arguments
         plan: pd.DataFrame  # DataFrame to be updated
-        ) -> pd.DataFrame:
+        ):
     """
     Parameters
     ----------
@@ -117,7 +116,7 @@ def add_note(
     --------
     This function must be updated everytime the columns of the plan are changed
     """
- 
+
     item = {}
     for name in plan.columns:
         if str(name) != "tags":
@@ -131,8 +130,6 @@ def add_note(
 
     plan = plan.append(data)
     update_data(plan)
-
-    return
 
 
 def add_note_verbose(
@@ -196,18 +193,18 @@ def print_planner(
     ----
     The function prints in the terminal all the notes 
     """
-   
+
     # Extracting the actual indeces of the pandas (it may have been
     # truncated in search_word)
     idx_plan  = plan.index.to_list()
-    
+
     #  convert the tags in a readable format, it accepts both list and string convertible in list
     for i,tag in enumerate(plan["tags"]):
         if type(tag) is str:
             plan.at[idx_plan[i],"tags"] = ', '.join(literal_eval(plan.at[idx_plan[i],'tags']))
         elif type(tag) is list:
             plan.at[idx_plan[i], "tags"] = ', '.join(tag)
-    
+
     plan_tab = lambda plan: tabulate(plan,
                                      headers=[str(plan.columns[0]), str(plan.columns[1]), str(plan.columns[2]), str(plan.columns[3])],
                                      tablefmt="fancy_grid",
@@ -215,28 +212,28 @@ def print_planner(
     print(plan_tab(plan))
 
 def search_word(args,plan):
-    
+
     # rewriting 'word' without capital letter
     word = vars(args)["word"].lower()
-    
+
     # row indeces whose title contains word
     rows_idx = []
-    
+
     # Converting plan to a list of lists to fasten the iteration through it
-    list_plan = plan.values 
-    
+    list_plan = plan.values
+
     # Iterating through arr_plan
     for idx,row in enumerate(list_plan):
-        
+
         # rewriting title and note without capital letters
         title = str(row[0]).lower()
         note = str(row[1]).lower()
         # checking if 'word' is either in title or note or both
-        if word in title or word in note: rows_idx.append(idx)     
+        if word in title or word in note: rows_idx.append(idx)
 
     # selecting only those rows whose titles or notes contain 'word'
     selected_plan = plan.iloc[rows_idx,:]
-    return selected_plan    
+    return selected_plan
 
 def search_by_tag(args, plan):
     """
@@ -250,8 +247,11 @@ def search_by_tag(args, plan):
     The function prints in the terminal all the notes
     """
 
-    #  rewriting 'word' in 'tag' without capital letter
-    tag_to_search = vars(args)["word"].lower()
+    #  rewriting 'word' in 'tag'
+    tag_to_search = args.tags
+    tag_to_search = tag_to_search.split()
+    no_tags = args.notag
+    no_tags = no_tags.split()
 
     #  row indexes whose title contains 'tag'
     rows_idx = []
@@ -262,8 +262,7 @@ def search_by_tag(args, plan):
     #  Searching for tags
     for idx, tags in enumerate(list_plan):
         list_plan[idx] = literal_eval(tags)
-        for tag in list_plan[idx]:
-            if tag.lower() == tag_to_search: rows_idx.append(idx)
+        if all(item in list_plan[idx] for item in tag_to_search) and list(np.intersect1d(no_tags, list_plan[idx])) == [] : rows_idx.append(idx)
 
     #  selecting only those rows whose tags contain 'tag'
     selected_plan = plan.iloc[rows_idx, :]
@@ -292,19 +291,29 @@ def main():
                                help='Date of the note', type=str, nargs='?',
                                default=datetime.today().strftime('%Y-%m-%d'))
     # Tags
-    insert_parser.add_argument("-t", "--tags",
-                               help="Tags of the note", nargs='+', default=str(["generic"]))
+    insert_parser.add_argument("tags",
+                               help="Tags of the note", nargs='*', default=str(["generic"]))
 
     # PRINT argument
     print_parser = subparsers.add_parser('print', help='Print out all the notes')
 
     # SEARCH argument
     search_parser = subparsers.add_parser('search', help='Find and print the notes that contain -word-')
-    search_parser.add_argument("-t", "--tags",
-                               help="Search notes by tag", action="store_true")
     search_parser.add_argument('word',
                                help='word to be searched in the body and the title of the notes',
-                               type=str)
+                               type=str, nargs='?')
+
+
+    # SEARCH_TAG argument
+    search_tab_parser = subparsers.add_parser('search_tag', help='Find and print the notes that contain -tag- or -tags-')
+    search_tab_parser.add_argument("-nt", "--notags",
+                               help="no tag to search", action="store_true")
+    search_tab_parser.add_argument('tags',
+                               help='tag/tags to be searched in the notes',
+                               type=str, nargs='?', default=' ')
+    search_tab_parser.add_argument('notag',
+                               help='tags to be excluded',
+                               type=str, nargs='?', default=' ')
 
     # SORT argument
     sort_parser = subparsers.add_parser('sort', help='Sort the notes by date')
@@ -315,19 +324,23 @@ def main():
         # arguments are converted into a argparser.Namespace object
     args = parser.parse_args()
 
-
     if args.subparser == 'insert':
         if args.verbose:
             plan = add_note_verbose(plan)
         else:
             plan = add_note(args, plan)
-    elif args.subparser == 'print':  print_planner(plan)
+
+    elif args.subparser == 'print':
+        print_planner(plan)
 
     elif args.subparser == 'search':
-        if args.tags:
-            selected_plan = search_by_tag(args,plan)
-        else:
-            selected_plan = search_word(args,plan)
+        selected_plan = search_word(args, plan)
+        print_planner(selected_plan)
+
+    elif args.subparser == 'search_tag':
+        if args.notags:
+            args.notag, args.tags = args.tags, ' '
+        selected_plan = search_by_tag(args, plan)
         print_planner(selected_plan)
 
     elif args.subparser == 'sort': 
