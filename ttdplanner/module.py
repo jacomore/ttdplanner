@@ -74,7 +74,7 @@ def update_data(
 
     # path to the "data.csv" file
     data_path = os.path.abspath(os.path.join(dir_path, "data.csv"))
-    
+
     # Sorting the dictionary by date
     plan["date"] = pd.to_datetime(plan["date"], format = '%Y-%m-%d', errors='coerce')
     plan["date"] = plan["date"].dt.date
@@ -189,7 +189,7 @@ def print_planner(
     # Extracting the actual indexes of the pandas (it may have been
     # truncated in search_word)
     idx_plan = plan.index.to_list()
-    
+
     #  convert the tags in a readable format, it accepts both list and string convertible in list
     for i, tag in enumerate(plan["tags"]):
         if type(tag) is str:
@@ -282,4 +282,3 @@ def search_by_tag(
     selected_plan = plan.iloc[rows_idx, :]
 
     return selected_plan
-

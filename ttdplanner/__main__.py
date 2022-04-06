@@ -4,13 +4,15 @@ from module import *
 def main():
     # parser initialization
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help='possible actions', dest='subparser')
+    subparsers = parser.add_subparsers(
+        help='possible actions', dest='subparser')
 
     # plan initialization
     plan = init_data()
 
     # INSERT argument
-    insert_parser = subparsers.add_parser('insert', help='Insert a new item into the planner')
+    insert_parser = subparsers.add_parser(
+        'insert', help='Insert a new item into the planner')
     insert_parser.add_argument("-v", "--verbose",
                                help="Increase output verbosity", action="store_true")
 
@@ -32,7 +34,8 @@ def main():
     subparsers.add_parser('print', help='Print out all the notes')
 
     # SEARCH argument
-    search_parser = subparsers.add_parser('search', help='Find and print the notes that contain -word-')
+    search_parser = subparsers.add_parser(
+        'search', help='Find and print the notes that contain -word-')
     search_parser.add_argument('word',
                                help='word to be searched in the body and the title of the notes',
                                type=str, nargs='?')
@@ -48,11 +51,6 @@ def main():
     search_tab_parser.add_argument('notag',
                                    help='tags to be excluded',
                                    type=str, nargs='?', default=' ')
-
-    # SORT argument
-    sort_parser = subparsers.add_parser('sort', help='Sort the notes by date')
-    sort_parser.add_argument("sort", help='sort the notes by date', type=str,
-                             nargs='?')
 
     # arguments are converted into an argparser.Namespace object
     args = parser.parse_args()
@@ -81,11 +79,6 @@ def main():
             args.notag, args.tags = args.tags, ' '
         selected_plan = search_by_tag(args, plan)
         print_planner(selected_plan)
-
-    # sort by date
-    elif args.subparser == 'sort':
-        sorted_plan = sort_by_date(plan)
-        print_planner(sorted_plan)
 
 
 if __name__ == '__main__':
