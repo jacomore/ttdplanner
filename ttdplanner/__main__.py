@@ -1,11 +1,4 @@
-import argparse
-from datetime import datetime
-
-from general import init_data
-from add_note import add_note, add_note_verbose
-from search import search_word, search_by_tag
-from sort import sort_by_date
-from print import print_planner
+from module import *
 
 
 def main():
