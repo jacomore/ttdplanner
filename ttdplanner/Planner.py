@@ -1,7 +1,7 @@
 import pickle
 import csv  # usare per leggere la classe
 import os
-
+from tabulate import tabulate
 class Planner:
 
     def __init__(self):
@@ -20,7 +20,6 @@ class Planner:
         rows = []
         for row in csv.reader(file):
             rows.append(row)
-        print(rows)
         return rows
 
     class Note:
@@ -34,5 +33,11 @@ class Planner:
     def add_note(self, title, body, date, tags):
         self.list_of_notes.append(self.Note(title, body, date, tags))
 
-    def update_planner(self, plan):
+    def update_plan(self, plan):
         self.list_of_notes = plan
+
+    def print_plan(self):
+        heads = self.list_of_notes[0]
+        tab_plan = tabulate(self.list_of_notes[1:], headers=heads,
+        tablefmt='orgtbl')
+        print(tab_plan)
