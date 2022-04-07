@@ -16,5 +16,3 @@ def progress(iterator):
         print(next(cycling), end="\r")
         yield element
     print(" \r", end='')
-
-print("ciao giacomo")
