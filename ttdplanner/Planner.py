@@ -47,5 +47,5 @@ class Planner:
     def print_plan(self):
         heads = self.list_of_notes[0]
         tab_plan = tabulate(self.list_of_notes[1:], headers=heads,
-        tablefmt='orgtbl')
+                            tablefmt='orgtbl')
         print(tab_plan)
