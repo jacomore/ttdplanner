@@ -15,7 +15,7 @@ def save_void_plan(path):
 
 
 def save_plan(plan, path):
-    """
+    """11
     this function saves plan in file.pkl in path
     """
     with open(path, 'wb') as out:

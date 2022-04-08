@@ -1,6 +1,6 @@
 import pickle
-import csv
-import os
+from datetime import datetime
+from tabulate import tabulate
 
 class Planner:
 
@@ -18,8 +18,27 @@ class Planner:
     def add_note(self, title, body, date, tags):
         self.list_of_notes.append(self.Note(title, body, date, tags))
 
-    def update_plan(self, plan):
-        self.list_of_notes = plan
+    def add_note_verbose(self):
+        # title
+        title = input("Please, insert the title: ")
+        # body
+        body = input("It's time to write your note: ")
+        # date
+        date = input("Insert the date 'Y-m-d'. Press Enter to use the current date: ")
+        if date == '':  # insert the current data if requested
+            date = datetime.today().strftime('%Y-%m-%d')
+        # tags
+        tags = input("Insert the tags (separated by a space or a comma): ")
+        tags = tags.split(sep=",") if "," in tags else tags.split(sep=" ")
+        # create the note
+        self.add_note(title, body, date, tags)
+
+    def save(self, path):
+        """
+        this function saves plan in file.pkl in path
+        """
+        with open(path, 'wb') as out:
+            pickle.dump(self, out, pickle.HIGHEST_PROTOCOL)
 
     def print_plan(self):
         heads = self.list_of_notes[0]
