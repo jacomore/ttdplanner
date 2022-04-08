@@ -10,6 +10,7 @@ def split_tags(tags):
     """
     return tags.split(sep=",") if "," in tags else tags.split(sep=" ")
 
+
 def save_void_plan(path):
     """
     this function create a file.pkl in path with a void plan inside and return a void plan
