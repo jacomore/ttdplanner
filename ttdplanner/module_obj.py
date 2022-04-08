@@ -5,6 +5,9 @@ from Planner import Planner
 
 
 def split_tags(tags):
+    """
+    split tags
+    """
     return tags.split(sep=",") if "," in tags else tags.split(sep=" ")
 
 def save_void_plan(path):
