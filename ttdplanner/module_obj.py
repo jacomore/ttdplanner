@@ -21,6 +21,14 @@ def save_void_plan(path):
     return void_plan
 
 
+def save_plan(plan, path):
+    """11
+    this function saves plan in file.pkl in path
+    """
+    with open(path, 'wb') as out:
+        pickle.dump(plan, out, pickle.HIGHEST_PROTOCOL)
+
+
 def read_plan(path):
     """
     this function read a plan from a file.pkl in path
@@ -29,32 +37,25 @@ def read_plan(path):
         return pickle.load(inp)
 
 
-def data_path():
-    """
-    return the data.pkl path
-    """
-    loc_dir = os.path.abspath(os.getcwd())
-    dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
-    return os.path.abspath(os.path.join(dir_path, "data.pkl"))
-
 def init_plan():
 
     # paths to dir and data.pkl
     loc_dir = os.path.abspath(os.getcwd())
     dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
+    data_path = os.path.abspath(os.path.join(dir_path, "data.pkl"))
 
     # If the folder does not exist yet
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
-        plan = save_void_plan(data_path())
+        plan = save_void_plan(data_path)
     # If the folder already exists
     else:
         # If "data.pkl" does not exist yet
-        if not os.path.exists(data_path()):
-            plan = save_void_plan(data_path())
+        if not os.path.exists(data_path):
+            plan = save_void_plan(data_path)
         # If "data.pkl" already exists
         else:
-            plan = read_plan(data_path())
+            plan = read_plan(data_path)
 
     # returning plan
     return plan
