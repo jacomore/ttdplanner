@@ -1,4 +1,7 @@
-from module import *
+import argparse
+from datetime import datetime
+
+from module_obj import *
 
 
 def main():
@@ -8,7 +11,7 @@ def main():
         help='possible actions', dest='subparser')
 
     # plan initialization
-    plan = init_data()
+    plan = init_plan()
 
     # INSERT argument
     insert_parser = subparsers.add_parser(
@@ -17,18 +20,18 @@ def main():
                                help="Increase output verbosity", action="store_true")
 
     # Title
-    insert_parser.add_argument(str(plan.columns[0]),
+    insert_parser.add_argument("title",
                                help='Title of the note', type=str, nargs='?', default="...")
     # Body of the note
-    insert_parser.add_argument(str(plan.columns[1]),
+    insert_parser.add_argument("body",
                                help='Body of the note', type=str, nargs='?', default="...")
     # Date
-    insert_parser.add_argument(str(plan.columns[2]),
+    insert_parser.add_argument("date",
                                help='Date of the note', type=str, nargs='?',
                                default=datetime.today().strftime('%Y-%m-%d'))
     # Tags
     insert_parser.add_argument("tags",
-                               help="Tags of the note", nargs='*', default=str(["generic"]))
+                               help="Tags of the note", nargs='?', default="generic")
 
     # PRINT argument
     subparsers.add_parser('print', help='Print out all the notes')
@@ -59,26 +62,32 @@ def main():
     # insert
     if args.subparser == 'insert':
         if args.verbose:
-            add_note_verbose(plan)
+            plan.add_note_verbose()
         else:
-            add_note(args, plan)
+            plan.add_note(args.title, args.body, args.date, split_tags(args.tags))
+        plan.save(data_path())
 
     # print
     elif args.subparser == 'print':
-        print_planner(plan)
+        for note in plan.list_of_notes:
+            print(note.title, note.body, note.date, note.tags)
 
     # search for words
     elif args.subparser == 'search':
-        selected_plan = search_word(args, plan)
-        print_planner(selected_plan)
+        #selected_plan = search_word(args, plan)
+        #print_planner(selected_plan)
+        pass
 
     # search/reject for tags
     elif args.subparser == 'search_tag':
+        """
         # this condition is necessary when there are no -tags- but only -notags-
         if args.notags:
             args.notag, args.tags = args.tags, ' '
         selected_plan = search_by_tag(args, plan)
         print_planner(selected_plan)
+        """
+        pass
 
 
 if __name__ == '__main__':
