@@ -43,7 +43,7 @@ class Planner:
         with open(path, 'wb') as out:
             pickle.dump(self, out, pickle.HIGHEST_PROTOCOL)
 
-            
+
     def print_plan(self):
         heads = self.list_of_notes[0]
         tab_plan = tabulate(self.list_of_notes[1:], headers=heads,
