@@ -2,10 +2,12 @@ import pickle
 from datetime import datetime
 from tabulate import tabulate
 
+
 class Planner:
 
     def __init__(self):
         self.list_of_notes = []
+
 
     class Note:
 
@@ -17,6 +19,7 @@ class Planner:
 
     def add_note(self, title, body, date, tags):
         self.list_of_notes.append(self.Note(title, body, date, tags))
+
 
     def add_note_verbose(self):
         # title
@@ -40,8 +43,9 @@ class Planner:
         with open(path, 'wb') as out:
             pickle.dump(self, out, pickle.HIGHEST_PROTOCOL)
 
+
     def print_plan(self):
         heads = self.list_of_notes[0]
         tab_plan = tabulate(self.list_of_notes[1:], headers=heads,
-        tablefmt='orgtbl')
+                            tablefmt='orgtbl')
         print(tab_plan)
