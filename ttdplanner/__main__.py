@@ -74,8 +74,8 @@ def main():
 
     # search for words
     elif args.subparser == 'search':
-        #selected_plan = search_word(args, plan)
-        #print_planner(selected_plan)
+        # selected_plan = search_word(args, plan)
+        # print_planner(selected_plan)
         pass
 
     # search/reject for tags

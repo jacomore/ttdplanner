@@ -1,13 +1,13 @@
 import pickle
 from datetime import datetime
 from tabulate import tabulate
+import json
 
 
 class Planner:
 
     def __init__(self):
         self.list_of_notes = []
-
 
     class Note:
 
@@ -19,7 +19,6 @@ class Planner:
 
     def add_note(self, title, body, date, tags):
         self.list_of_notes.append(self.Note(title, body, date, tags))
-
 
     def add_note_verbose(self):
         # title
@@ -40,9 +39,8 @@ class Planner:
         """
         this function saves plan in file.pkl in path
         """
-        with open(path, 'wb') as out:
-            pickle.dump(self, out, pickle.HIGHEST_PROTOCOL)
-
+        with open(path, 'w') as outfile:
+            json.dump(self, outfile, default=lambda o: o.__dict__, indent=1)
 
     def print_plan(self):
         heads = self.list_of_notes[0]

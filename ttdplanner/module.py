@@ -76,7 +76,7 @@ def update_data(
     data_path = os.path.abspath(os.path.join(dir_path, "data.csv"))
 
     # Sorting the dictionary by date
-    plan["date"] = pd.to_datetime(plan["date"], format = '%Y-%m-%d', errors='coerce')
+    plan["date"] = pd.to_datetime(plan["date"], format='%Y-%m-%d', errors='coerce')
     plan["date"] = plan["date"].dt.date
     plan = plan.sort_values(by="date")
 
@@ -173,6 +173,7 @@ def add_note_verbose(
     plan = plan.append(data_bug)
     update_data(plan)
 
+
 def print_planner(
         plan: pd.DataFrame
 ):
@@ -206,6 +207,7 @@ def print_planner(
                                      showindex=False)
     # printing the plan in the table
     print(plan_tab(plan))
+
 
 def search_word(
         args: argparse.Namespace,  # parser arguments
