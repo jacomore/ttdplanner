@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime
-
 from module_obj import *
+
 
 
 def main():
@@ -11,7 +11,15 @@ def main():
         help='possible actions', dest='subparser')
 
     # plan initialization
-    plan = init_plan()
+    plan = Planner()
+
+    # fill the plan
+    init_plan(plan)
+
+    # DATA TO PATH
+    _, data_path= data_to_path()
+
+    
 
     # INSERT argument
     insert_parser = subparsers.add_parser(
@@ -65,7 +73,7 @@ def main():
             plan.add_note_verbose()
         else:
             plan.add_note(args.title, args.body, args.date, split_tags(args.tags))
-        plan.save(data_path())
+        plan.save(data_path)
 
     # print
     elif args.subparser == 'print':
