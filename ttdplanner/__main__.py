@@ -3,7 +3,6 @@ from datetime import datetime
 from module_obj import *
 
 
-
 def main():
     # parser initialization
     parser = argparse.ArgumentParser()
@@ -17,9 +16,7 @@ def main():
     init_plan(plan)
 
     # DATA TO PATH
-    _, data_path= data_to_path()
-
-    
+    _, data_path = data_to_path()
 
     # INSERT argument
     insert_parser = subparsers.add_parser(
@@ -77,8 +74,7 @@ def main():
 
     # print
     elif args.subparser == 'print':
-        for note in plan.list_of_notes:
-            print(note.title, note.body, note.date, note.tags)
+        plan.print_plan()
 
     # search for words
     elif args.subparser == 'search':
