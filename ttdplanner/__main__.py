@@ -1,3 +1,4 @@
+from Planner import Planner
 import argparse
 from datetime import datetime
 from module_obj import *
@@ -60,6 +61,13 @@ def main():
                                    help='tags to be excluded',
                                    type=str, nargs='?', default=' ')
 
+    # DELETE_NOTE argument
+    delete_note_parser = subparsers.add_parser('delete_tag',
+                                              help='delete a note by its id')
+    delete_note_parser.add_argument('id',
+                                   help='id of the note to be deleted',
+                                   type=str, nargs='+', default='-1')
+
     # arguments are converted into an argparser.Namespace object
     args = parser.parse_args()
 
@@ -84,14 +92,19 @@ def main():
 
     # search/reject for tags
     elif args.subparser == 'search_tag':
-        """
         # this condition is necessary when there are no -tags- but only -notags-
         if args.notags:
             args.notag, args.tags = args.tags, ' '
-        selected_plan = search_by_tag(args, plan)
-        print_planner(selected_plan)
-        """
-        pass
+        plan_by_tag = plan.search_tag(args.tags, args.notag)
+        plan_by_tag.print_plan()
+
+    elif args.subparser == 'delete_tag':
+        for note_id in args.id:
+            if isinstance(plan.note_by_id(note_id), int):
+                del plan.list_of_notes[plan.note_by_id(note_id)]
+            else:
+                print(note_id, " not found")
+        plan.save(data_path)
 
 
 if __name__ == '__main__':
