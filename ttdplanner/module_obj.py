@@ -1,13 +1,11 @@
 import os
-import json
-from Planner import Planner
 
 
 def data_to_path():
     loc_dir = os.path.abspath(os.getcwd())
     dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))
-    data_path = os.path.abspath(os.path.join(dir_path,"data.json"))
-    return dir_path,data_path
+    data_path = os.path.abspath(os.path.join(dir_path, "data.json"))
+    return dir_path, data_path
 
 
 def init_plan(plan):
@@ -33,5 +31,3 @@ def split_tags(tags):
     split tags
     """
     return tags.split(sep=",") if "," in tags else tags.split(sep=" ")
-
-
