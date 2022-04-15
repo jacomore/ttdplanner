@@ -3,6 +3,7 @@ import argparse
 from datetime import datetime
 from module_obj import *
 
+
 def main():
     # parser initialization
     parser = argparse.ArgumentParser()
@@ -49,23 +50,38 @@ def main():
                                type=str, nargs='?')
 
     # SEARCH_TAG argument
-    search_tab_parser = subparsers.add_parser('search_tag',
+    search_tag_parser = subparsers.add_parser('search_tag',
                                               help='Find and print the notes that contain -tag- or -tags-')
-    search_tab_parser.add_argument("-nt", "--notags",
+    search_tag_parser.add_argument("-nt", "--notags",
                                    help="no tag to search", action="store_true")
-    search_tab_parser.add_argument('tags',
+    search_tag_parser.add_argument('tags',
                                    help='tag/tags to be searched in the notes',
                                    type=str, nargs='?', default=' ')
-    search_tab_parser.add_argument('notag',
+    search_tag_parser.add_argument('notag',
                                    help='tags to be excluded',
                                    type=str, nargs='?', default=' ')
 
-    # DELETE_NOTE argument
+    # DELETE argument
     delete_note_parser = subparsers.add_parser('delete',
-                                              help='delete a note by its id')
+                                               help='delete a note by its id')
     delete_note_parser.add_argument('id',
-                                   help='id of the note to be deleted',
-                                   type=str, nargs='+', default='-1')
+                                    help='id of the note to be deleted',
+                                    type=str, nargs='+', default='-1')
+
+    # MODIFY argument
+    modify_parser = subparsers.add_parser('modify',
+                                          help='Find and print the notes that contain -tag- or -tags-')
+    modify_parser.add_argument("-tg", "--tags",
+                               help="modify tags", action="store_true")
+    modify_parser.add_argument("-tt", "--title",
+                               help="modify title", action="store_true")
+    modify_parser.add_argument("-nt", "--note",
+                               help="modify note", action="store_true")
+    modify_parser.add_argument("-dt", "--date",
+                               help="modify date", action="store_true")
+    modify_parser.add_argument('id',
+                               help='id of the note to be modified',
+                               type=str, nargs='?', default="-1")
 
     # arguments are converted into an argparser.Namespace object
     args = parser.parse_args()
@@ -88,7 +104,6 @@ def main():
         plan_by_word = plan.search_word(args.word)
         plan_by_word.print_plan()
 
-
         # search/reject for tags
     elif args.subparser == 'search_tag':
         # this condition is necessary when there are no -tags- but only -notags-
@@ -102,8 +117,29 @@ def main():
             if isinstance(plan.note_by_id(note_id), int):
                 del plan.list_of_notes[plan.note_by_id(note_id)]
             else:
-                print("Id "+str(note_id)+" not associated with any note.")
+                print("Id " + str(note_id) + " not associated with any note.")
         plan.save(data_path)
+
+    elif args.subparser == 'modify':
+        if isinstance(plan.note_by_id(int(args.id)), int):
+            if args.title:
+                plan.set_note_title_verbose(plan.note_by_id(int(args.id)))
+            if args.note:
+                plan.set_note_body_verbose(plan.note_by_id(int(args.id)))
+            if args.date:
+                plan.set_note_date_verbose(plan.note_by_id(int(args.id)))
+            if args.tags:
+                plan.set_note_tags_verbose(plan.note_by_id(int(args.id)))
+            if not args.title and not args.note and not args.date and not args.tags:
+                print("type one or more of the following flags to modify a note:\n"
+                      "-tt: title\n-nt: note\n-dt: date\n-tg: tags\n\n"
+                      "example: modify -nt \" 0003\"\n"
+                      "this will modify the note with id \"0003\"")
+            plan.save(data_path)
+
+        else:
+            print("Id " + str(args.id) + " not associated with any note.")
+
 
 if __name__ == '__main__':
     main()
