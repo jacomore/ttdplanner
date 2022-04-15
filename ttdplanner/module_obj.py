@@ -1,6 +1,5 @@
 import os
 
-
 def data_to_path():
     loc_dir = os.path.abspath(os.getcwd())
     dir_path = os.path.abspath(os.path.join(loc_dir, "..", "data"))

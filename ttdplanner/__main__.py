@@ -3,7 +3,6 @@ import argparse
 from datetime import datetime
 from module_obj import *
 
-
 def main():
     # parser initialization
     parser = argparse.ArgumentParser()
@@ -44,7 +43,7 @@ def main():
 
     # SEARCH argument
     search_parser = subparsers.add_parser(
-        'search', help='Find and print the notes that contain -word-')
+        'search_word', help='Find and print the notes that contain -word-')
     search_parser.add_argument('word',
                                help='word to be searched in the body and the title of the notes',
                                type=str, nargs='?')
@@ -62,7 +61,7 @@ def main():
                                    type=str, nargs='?', default=' ')
 
     # DELETE_NOTE argument
-    delete_note_parser = subparsers.add_parser('delete_tag',
+    delete_note_parser = subparsers.add_parser('delete',
                                               help='delete a note by its id')
     delete_note_parser.add_argument('id',
                                    help='id of the note to be deleted',
@@ -85,12 +84,12 @@ def main():
         plan.print_plan()
 
     # search for words
-    elif args.subparser == 'search':
-        # selected_plan = search_word(args, plan)
-        # print_planner(selected_plan)
-        pass
+    elif args.subparser == 'search_word':
+        plan_by_word = plan.search_word(args.word)
+        plan_by_word.print_plan()
 
-    # search/reject for tags
+
+        # search/reject for tags
     elif args.subparser == 'search_tag':
         # this condition is necessary when there are no -tags- but only -notags-
         if args.notags:
@@ -98,14 +97,13 @@ def main():
         plan_by_tag = plan.search_tag(args.tags, args.notag)
         plan_by_tag.print_plan()
 
-    elif args.subparser == 'delete_tag':
+    elif args.subparser == 'delete':
         for note_id in args.id:
             if isinstance(plan.note_by_id(note_id), int):
                 del plan.list_of_notes[plan.note_by_id(note_id)]
             else:
-                print(note_id, " not found")
+                print("Id "+str(note_id)+" not associated with any note.")
         plan.save(data_path)
-
 
 if __name__ == '__main__':
     main()

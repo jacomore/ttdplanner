@@ -3,7 +3,6 @@ from tabulate import tabulate
 import json
 import numpy as np
 
-
 class Planner:
 
     def __init__(self):
@@ -102,3 +101,24 @@ class Planner:
         for idx, note in enumerate(self.list_of_notes):
             if note.id == id_note:
                 return idx
+
+    def search_word(self, word): 
+        # rewriting word without capital letter
+        word = word.lower()
+        rows_idx = []
+
+        for idx,item  in enumerate(self.list_of_notes):
+            title = item.title.lower()
+            note = item.body.lower()
+
+            if word in title or word in note: 
+                
+                     rows_idx.append(idx)
+
+        plan_by_word = Planner()
+        for idx in rows_idx:
+            plan_by_word.add_note(self.list_of_notes[idx].title, self.list_of_notes[idx].body,
+                                 self.list_of_notes[idx].date, self.list_of_notes[idx].tags,
+                                 self.list_of_notes[idx].id)
+        return plan_by_word
+
