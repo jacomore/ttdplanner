@@ -3,6 +3,7 @@ from tabulate import tabulate
 import json
 import numpy as np
 
+
 class Planner:
 
     def __init__(self):
@@ -102,23 +103,54 @@ class Planner:
             if note.id == id_note:
                 return idx
 
-    def search_word(self, word): 
+    def search_word(self, word):
         # rewriting word without capital letter
         word = word.lower()
         rows_idx = []
 
-        for idx,item  in enumerate(self.list_of_notes):
+        for idx, item in enumerate(self.list_of_notes):
             title = item.title.lower()
             note = item.body.lower()
 
-            if word in title or word in note: 
-                
-                     rows_idx.append(idx)
+            if word in title or word in note:
+                rows_idx.append(idx)
 
         plan_by_word = Planner()
         for idx in rows_idx:
             plan_by_word.add_note(self.list_of_notes[idx].title, self.list_of_notes[idx].body,
-                                 self.list_of_notes[idx].date, self.list_of_notes[idx].tags,
-                                 self.list_of_notes[idx].id)
+                                  self.list_of_notes[idx].date, self.list_of_notes[idx].tags,
+                                  self.list_of_notes[idx].id)
         return plan_by_word
 
+    def set_note_title(self, idx, title):
+        self.list_of_notes[idx].title = title
+
+    def set_note_title_verbose(self, idx):
+        print("insert the new title:")
+        title = input()
+        self.set_note_title(idx, title)
+
+    def set_note_body(self, idx, body):
+        self.list_of_notes[idx].body = body
+
+    def set_note_body_verbose(self, idx):
+        print("insert the new note:")
+        body = input()
+        self.set_note_body(idx, body)
+
+    def set_note_date(self, idx, date):
+        self.list_of_notes[idx].date = date
+
+    def set_note_date_verbose(self, idx):
+        print("insert the new date:")
+        date = input()
+        self.set_note_date(idx, date)
+
+    def set_note_tags(self, idx, tags):
+        self.list_of_notes[idx].tags = tags
+
+    def set_note_tags_verbose(self, idx):
+        print("insert the new tags separated by commas or blank spaces:")
+        tags = input()
+        tags = tags.split(sep=",") if "," in tags else tags.split(sep=" ")
+        self.set_note_tags(idx, tags)
