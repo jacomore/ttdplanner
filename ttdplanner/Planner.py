@@ -9,6 +9,7 @@ class Planner:
     def __init__(self):
         self.list_of_notes = []
 
+
     class Note:
 
         def __init__(self, title, body, date, tags, id_note):
@@ -62,11 +63,13 @@ class Planner:
         print(tabulate(plan, headers=["id", "title", "note", "date", "tags"], tablefmt="fancy_grid", showindex=False))
 
     def id_note(self):
-        note_id = 0
-        for note in self.list_of_notes:
-            if note_id <= int(note.id):
-                note_id = int(note.id) + 1
-        return note_id
+        if self.list_of_notes == []:
+            print("if è verificato")
+            return 1
+
+        else:
+            return max(note.id for note in self.list_of_notes)+1
+
 
     def search_tag(self, tag, notag):
         # writing tag and notag in list form

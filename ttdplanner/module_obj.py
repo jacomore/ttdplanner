@@ -1,10 +1,9 @@
 import os
+from Planner import Planner
 
-import ttdplanner.Planner
 
-
-def data_to_path(
-) -> tuple[str, str]:  # [path to the directory, path to the .json file]
+def data_to_path():
+#) -> tuple[str, str]:  # [path to the directory, path to the .json file]
     """
     Returns
     -------
@@ -23,7 +22,7 @@ def data_to_path(
 
 
 def init_plan(
-        plan: ttdplanner.Planner.Planner  # initial Planner to be initialized
+        plan: Planner  # initial Planner to be initialized
 ):
     """
     Parameters
