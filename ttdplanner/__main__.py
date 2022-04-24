@@ -17,7 +17,7 @@ def main():
     init_plan(plan)
 
     # DATA TO PATH
-    _, data_path = data_to_path()
+    dir_path , data_path = data_to_path()
 
     # INSERT argument
     insert_parser = subparsers.add_parser(
@@ -93,9 +93,11 @@ def main():
             plan.add_note_verbose()
         else:
             plan.add_note(args.title, args.body, args.date, split_tags(args.tags))
-        plan.save(data_path)
-
-    # print
+       
+        plan.save_plan(data_path)
+        plan.to_xlsx(dir_path)
+       
+       # print
     elif args.subparser == 'print':
         plan.print_plan()
 
@@ -118,7 +120,8 @@ def main():
                 del plan.list_of_notes[plan.note_by_id(note_id)]
             else:
                 print("Id " + str(note_id) + " not associated with any note.")
-        plan.save(data_path)
+        plan.save_plan(data_path)
+        plan.to_xlsx(dir_path)
 
     elif args.subparser == 'modify':
         if isinstance(plan.note_by_id(int(args.id)), int):
@@ -135,7 +138,8 @@ def main():
                       "-tt: title\n-nt: note\n-dt: date\n-tg: tags\n\n"
                       "example: modify -nt \" 0003\"\n"
                       "this will modify the note with id \"0003\"")
-            plan.save(data_path)
+            plan.save_plan(data_path)
+            plan.to_xlsx(dir_path)
 
         else:
             print("Id " + str(args.id) + " not associated with any note.")

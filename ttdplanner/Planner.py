@@ -1,14 +1,14 @@
-from datetime import datetime
-from tabulate import tabulate
 import json
 import numpy as np
-
+import pandas as pd
+from datetime import datetime
+from tabulate import tabulate
+from operator import itemgetter
 
 class Planner:
 
     def __init__(self):
         self.list_of_notes = []
-
 
     class Note:
 
@@ -20,32 +20,41 @@ class Planner:
             self.id = id_note
 
     def add_note(self, title, body, date, tags, id_note=-1):
-        if int(id_note) not in range(9999):
-            self.list_of_notes.append(self.Note(title, body, date, tags, self.id_note()))
-        else:
+        
+        if [title,body] == ["...","..."]: 
+            print("Please, insert at least the title or the body of the note.")
+            return
+
+        if int(id_note) in range(9999):  
             self.list_of_notes.append(self.Note(title, body, date, tags, int(id_note)))
+        else:
+            self.list_of_notes.append(self.Note(title, body, date, tags, self.id_note()))
+
 
     def add_note_verbose(self):
         # title
-        title = input("Please, insert the title: ")
+        title = input("Type the title of the note: ")
         # body
-        body = input("It's time to write your note: ")
+        body = input("Type the body of the note: ")
         # date
-        date = input("Insert the date 'Y-m-d'. Press Enter to use the current date: ")
+        date = input("Type the date in the format Y-m-d. Press Enter to use the current date: ")
         if date == '':  # insert the current data if requested
             date = datetime.today().strftime('%Y-%m-%d')
         # tags
-        tags = input("Insert the tags (separated by a space or a comma): ")
+        tags = input("Type the tags of the note (separated by a space or a comma): ")
         tags = tags.split(sep=",") if "," in tags else tags.split(sep=" ")
         # create the note
         self.add_note(title, body, date, tags)
 
-    def save(self, path):
+
+    def save_plan(self, path):
         """
         this function saves plan in json format in path
         """
+        self.sort_by_date()
         with open(path, 'w') as outfile:
             json.dump(self, outfile, default=lambda o: o.__dict__, indent=1)
+
 
     def read_plan(self, path):
         with open(path, 'r') as json_file:
@@ -60,13 +69,13 @@ class Planner:
         plan = []
         for note in self.list_of_notes:
             plan.append([str(note.id).zfill(4), note.title, note.body, note.date, ', '.join(note.tags)])
-        print(tabulate(plan, headers=["id", "title", "note", "date", "tags"], tablefmt="fancy_grid", showindex=False))
+        print(tabulate(plan, headers=["id", "title", "note", "date", "tags"], tablefmt="fancy_grid",
+            showindex=False))
+
 
     def id_note(self):
         if self.list_of_notes == []:
-            print("if è verificato")
             return 1
-
         else:
             return max(note.id for note in self.list_of_notes)+1
 
@@ -106,6 +115,28 @@ class Planner:
             if note.id == id_note:
                 return idx
 
+    def sort_by_date(self):
+        # converting Note.date attribute for each item into a datetime object
+        list_of_dates = [datetime.strptime(item.date,"%Y-%m-%d") for item in self.list_of_notes]
+        temp_zip = zip(list_of_dates,self.list_of_notes) 
+        temp_sort = sorted(temp_zip, key=itemgetter(0))
+        if temp_sort != []:
+            _ , self.list_of_notes= zip(*temp_sort) 
+
+    def to_xlsx(self,path):
+        plan_dict = {"ID":[],"Title":[],"Body":[],"Date":[],"Tags":[]}
+        
+        for item in self.list_of_notes:
+            plan_dict["ID"].append(item.id)
+            plan_dict["Title"].append(item.title)
+            plan_dict["Body"].append(item.body)
+            plan_dict["Date"].append(item.date)
+            plan_dict["Tags"].append(item.tags)
+
+        #print(plan_dict)
+        plan = pd.DataFrame(plan_dict)
+        plan.to_excel(path+"/plan.xlsx")
+
     def search_word(self, word):
         # rewriting word without capital letter
         word = word.lower()
@@ -129,7 +160,7 @@ class Planner:
         self.list_of_notes[idx].title = title
 
     def set_note_title_verbose(self, idx):
-        print("insert the new title:")
+        print("Type the new title of the note:")
         title = input()
         self.set_note_title(idx, title)
 
@@ -137,7 +168,7 @@ class Planner:
         self.list_of_notes[idx].body = body
 
     def set_note_body_verbose(self, idx):
-        print("insert the new note:")
+        print("Type the new body of the note:")
         body = input()
         self.set_note_body(idx, body)
 
@@ -145,7 +176,7 @@ class Planner:
         self.list_of_notes[idx].date = date
 
     def set_note_date_verbose(self, idx):
-        print("insert the new date:")
+        print("Type the new date of the note:")
         date = input()
         self.set_note_date(idx, date)
 
@@ -153,7 +184,7 @@ class Planner:
         self.list_of_notes[idx].tags = tags
 
     def set_note_tags_verbose(self, idx):
-        print("insert the new tags separated by commas or blank spaces:")
+        print("Type the new tags separated by commas or blank spaces:")
         tags = input()
         tags = tags.split(sep=",") if "," in tags else tags.split(sep=" ")
         self.set_note_tags(idx, tags)
